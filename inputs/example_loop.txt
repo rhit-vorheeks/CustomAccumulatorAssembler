@@ -1,0 +1,6 @@
+andi 0
+addi 5
+loop: beq done
+addi -1
+jump loop
+done: out a0
