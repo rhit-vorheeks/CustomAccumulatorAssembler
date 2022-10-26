@@ -42,6 +42,7 @@ public class Main {
         //etc
     }};
 
+
     /**
      * Takes an input file name located inside /inputs, and creates machine code and exports it into /outputs under the same name.
      * @param args
@@ -73,7 +74,7 @@ public class Main {
 
         // Set up variables
         HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
-//        int startingAddress =
+        int startingAddress = 0x00040000;
 
         try {
             // Connect the filename to the path
@@ -83,21 +84,27 @@ public class Main {
             System.out.println(filepath);
 
             // Attempts to find file
-            File file=new File(filepath);
+            File file = new File(filepath);
 
             // Opens a scanner of the file
             Scanner sc = new Scanner(file);
 
+            // Creates a wrapper that keeps track of the current instruction line.
             IntegerWrapper lineNum = new IntegerWrapper(0);
 
             while (sc.hasNextLine()) {
 
-                // Grabs current line
+                // Grabs current line in input file
                 String currentLine = sc.nextLine();
                 System.out.println("line "+lineNum.getValue()+": "+currentLine);
 
-                // Splits up the string by spaces
+                // Splits up the instruction by spaces
                 String[] strList = currentLine.split(" ");
+
+                // Let's clean up the strings incase there's any leftover space/indent junk.
+                for (int i = 0; i < strList.length; i++) {
+                    strList[i].trim();
+                }
 
                 // Starting position for searching for instruction and arguments
                 // Set here because it will change depending on if a label exists
@@ -106,8 +113,12 @@ public class Main {
                 // Checks for labels
                 if (strList[0].contains(":")) {
                     String label = strList[0];
-                    String labelName = label.substring(0, label.length()-1);
-                    labelMap.put(labelName, lineNum.getValue());
+                    String labelName = label.substring(0, label.length()-1).toUpperCase();
+
+                    // Puts the address in storage.
+                    // This definitely doesn't work properly yet but it's a wip.
+                    labelMap.put(labelName, startingAddress + (2*lineNum.getValue()));
+
                     System.out.println("\tFound label '"+labelName+"' at line #"+lineNum.getValue());
                     startPos++;
                 }
@@ -118,6 +129,7 @@ public class Main {
             }
             sc.close();
         } catch(Exception e){
+            // Error :(
             e.printStackTrace();
         }
 
@@ -144,21 +156,52 @@ public class Main {
         // Creates TwoByteBuilder
         TwoByteBuilder twoByte = new TwoByteBuilder();
 
+        // Gets the bits for the instruction
         int[] instArray = instructionMap.get(instruction);
-
         for (int i = 0; i < instArray.length; i++) {
             twoByte.setNextBit(instArray[i]);
         }
 
+        // Grabs the argument strings
         String argument1 = instList[startPos + 1];
 
         twoByte.printBytes();
 
+        // Increases the line counter by 1
         lineNum.incrementValue(1);
 
         return twoByte;
     }
 
+    /**
+     * Turns a 16-bit number into its signed binary representation as an array of 1s and 0s
+     * @param given
+     * @param lineNum
+     * @return int[]
+     */
+    public static int[] createBitsFrom16BitNum(int given, IntegerWrapper lineNum) {
+        if (given > 32767 || given < -32768) {
+            System.out.println("Number greater than 16 bit on line: "+lineNum.getValue());
+            System.exit(0);
+        }
+        String binaryString = create16BitSignedStringFromInt(given);
+        return new int[5];
+    }
 
+    /**
+     * Given a 16-bit number, turns it into a String of its 16-bit signed representation.
+     * @param given
+     * @return String
+     */
+    public static String create16BitSignedStringFromInt(int given) {
+        String testString;
+        if (given >= 0) {
+            testString = String.format("%16s",Integer.toBinaryString(given)).replaceAll(" ", "0");
+        } else {
+            testString = Integer.toBinaryString(given);
+            testString = testString.substring(16);
+        };
+        return testString;
+    }
 }
 
