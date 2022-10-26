@@ -146,7 +146,7 @@ public class Main {
      */
     public static TwoByteBuilder encodeInstruction(String[] instList, IntegerWrapper lineNum, int startPos) {
         // Pulls instruction from list
-        String instruction = instList[startPos];
+        String instruction = instList[startPos].toLowerCase();
 
         // Checks if instruction exists. If not, ends the script.
         if (!instructionMap.containsKey(instruction)){
@@ -165,6 +165,33 @@ public class Main {
         // Grabs the argument strings
         String argument1 = instList[startPos + 1];
 
+        if (instruction.equals("sr") || instruction.equals("lr") || instruction.equals("in") ||instruction.equals("out")) {
+            // Handle R type instructions here
+        } else if (instruction.equals("lui")) {
+            // Handle U type instructions here
+        } else {
+            // Anything else must be A type
+
+            // First check if we're loading a label or an integer
+            if (instruction.charAt(0) == 'b' || instruction.charAt(0) == 'j') {
+                // Put label in instruction
+            } else {
+                // Put integer in instruction
+                // First convert the argument to an integer
+                int value = Integer.parseInt(argument1);
+
+                // Gets the array of bits from the integer
+                int[] arrayOfBits = createBitArrayFrom16BitNum(value, lineNum);
+
+                // Assigns the bits to our builder
+                for (int i = 5; i < arrayOfBits.length; i++) {
+                    twoByte.setNextBit(arrayOfBits[i]);
+                }
+
+            }
+        }
+
+
         twoByte.printBytes();
 
         // Increases the line counter by 1
@@ -179,13 +206,24 @@ public class Main {
      * @param lineNum
      * @return int[]
      */
-    public static int[] createBitsFrom16BitNum(int given, IntegerWrapper lineNum) {
+    public static int[] createBitArrayFrom16BitNum(int given, IntegerWrapper lineNum) {
         if (given > 32767 || given < -32768) {
             System.out.println("Number greater than 16 bit on line: "+lineNum.getValue());
             System.exit(0);
         }
         String binaryString = create16BitSignedStringFromInt(given);
-        return new int[5];
+        int[] binaryArray = new int[16];
+
+        for (int i = 0; i < binaryArray.length; i++) {
+            char ch = binaryString.charAt(i);
+            if (ch == '0') {
+                binaryArray[i] = 0;
+            } else {
+                binaryArray[i] = 1;
+            }
+        }
+
+        return binaryArray;
     }
 
     /**
