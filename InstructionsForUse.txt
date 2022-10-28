@@ -1,0 +1,8 @@
+1. Navigate to src directory in command prompt.
+
+2. If necessary, compile Main using the command "javac Main.java"
+
+3. Run "java Main [filename]" to run the assembler.
+	-Filename must be located inside inputs directory.
+	-Filename must have a file extension.
+	-Program will remove file extension and put output into outputs directory.

@@ -52,8 +52,17 @@ public class TwoByteBuilder {
      * Prints out the two bytes currently stored in the builder
      */
     public void printBytes() {
+        System.out.println(this.toString());
+    }
+
+    /**
+     * Returns String format of the Builder.
+     * @return
+     */
+    public String toString() {
         String s1 = String.format("%8s", Integer.toBinaryString(this.byteOne & 0xFF)).replace(' ', '0');
         String s2 = String.format("%8s", Integer.toBinaryString(this.byteTwo & 0xFF)).replace(' ', '0');
-        System.out.println(s1+s2);
+        return s1+s2;
     }
+
 }
