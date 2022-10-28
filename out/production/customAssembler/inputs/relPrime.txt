@@ -1,0 +1,132 @@
+// to start, int n is gonna be a0 register
+
+relPrime: lr		sp			//copies sp into main
+	addi	-6			//moves sp down by 6
+	sr		sp			//copies main(sp) into sp
+	sr 		sa			//copies main(sp) to sa for usage later
+
+						//stores m (= 2) onto the stack
+	andi	0		//sets main to zero
+	ori		2			//uses ori to turn main(m) to 2
+	sw		0			//stores main(m) at memory address in sa(sp) by offset of 0(immediate)
+
+						//stores n onto the stack
+	lr		a0			//copies argument0(n) into main
+	sw		2			//stores main(n) at memory address in sa(sp) by offset of 2(immediate)
+
+						//stores ra on the stack
+	lr		ra			//copies ra(return address) into main
+	sw		4			//stores main(return address) in memeory in sa(sp) by offset of 4(immediate)
+
+
+
+loopPrime: lr		sp
+	sr		sa
+
+						//next we take n and put it into a0
+	lw		2			//load memory from sa(which is currently where sp is) and offset it by 2 to get n into main
+	sr		a0			//now n is stored into a0
+
+						//next we need to take m and put it into a1
+	lw		0
+	sr		a1
+
+						//now we need to fetch the value returned by gcd
+	jal		gcd			//now we jump to gcd and then store the return address back here in ra
+						//after this we can assume that a0 contains the value returned by gcd
+
+						//subtract 1 from a0 to set the comparison for the branching
+	addi	-1		 	//subtracts 1 from a0 so its ready for comparison
+	beq		finished 	//if a0 == 1 then branch to finished
+						//else
+						//set up sp into sa so its able to fetch from memory
+	lr		sp
+	sr		sa
+
+						//loads m from memory, adds 1, and then puts it back onto the stack memory
+	lw		2			//loads m onto main from offset of 2 from sa(currently copy of sp)
+	addi	1			//adds 1 to m(main)
+	sw		2			//stores m back into sa(currently copy of sp) with offset of 2
+
+						//finished with loop, so jump back pu
+	jump	loopPrime
+
+
+
+finished: lr		sp
+	sr		sa
+
+						//next we need to take m and put it into a0 for returning
+	lw		0			//gets m from memory (sp) with offset of 0
+	sr		a0			//stores m into a0 for returning
+
+	lw		4			//gets the ra from memory and puts it into main
+	sr		ra			//puts the ra value from memory into the ra register
+
+	lr		sp			//copies sp into main
+	addi 	6			//increments it by 6 to clean up the stack
+	sr		sp			//sets the stack back to itself after the value has been changed
+
+	jra		0			//jumps to ra(plus immediate of 0) and doesn't save a return address
+
+
+
+
+
+gcd:  lr		a0			//loads a0 into main
+	bne		startOfLoop	//if a != 0 then it jumps to startOfLoop, if not then it ends early and returns b
+	lr		a1			//loads b into main
+	sr		a0			//puts that b into return(a0)
+	jra		0			//jumps to ra with b in return register.
+
+startOfLoop: lr		sp			//copies sp into main
+	addi	-4			//moves sp down by 4
+	sr		sp			//copies main(sp) into sp
+	sr 		sa			//copies main(sp) to sa for usage later
+
+	lr		a0			//loads a0(a) into main
+	sw		0			//stores a on the stack at offset 0
+
+	lr		a1			//loads a1(b) into main
+	sw		2			//stores b on the stack at offset 2
+
+						//then gets into the actual loop
+loopGcd: lr		sp			//gets sp into main
+	sr		sa			//puts sp into sa so it can be used for fetching from memory
+
+	lw		2			//gets b copy(at offset of 2 from sa) and puts it into main
+	beq		endOfGcd	//if b is == 0, we want to end the loop so it jumps to endOfGcd
+
+	sub		0			//takes main value(b), and subtracts value at sa + 0 (which is where a is located)
+	bge		elseGcd		//if b>=a, we want to go to the else statement
+
+						//otherwise, we go with case 1 here
+	lw		0			//gets a copy of a and puts it into main
+	sub		2			//takes a and subtracts the value at sa+2(which is b)
+	sw		0			//stores this new value back at a
+	jump	loopGcd		//jumps to loopGcd and doesn't save any ra
+
+elseGcd: lw		2			//gets a copy of b and puts it into main
+	sub		0			//takes b and subtracts the value at sa+0(which is a)
+	sw		2			//stores this new value back at b
+	jump	loopGcd		//jumps to loopGcd and doesn't save any ra
+
+
+endOfGcd: lr		sp			//copies sp into main
+	sr		sa			//then puts sp into sa so we can fetch from memory with it
+
+	lw		0			//fetches a from memory since its at offset 0
+	sr		a0			//moves a into a0 since its the return value
+
+	lr		sp			//copies sp into main
+	addi	4			//adds 4 to stack to clean up
+	sr		sp			//moves stack value back into its register
+
+	jra		0			//jumps back to the ra
+
+
+
+
+
+
+
