@@ -1,8 +1,7 @@
-1. Navigate to src directory in command prompt.
-
-2. If necessary, compile Main using the command "javac Main.java"
-
-3. Run "java Main [filename]" to run the assembler.
-	-Filename must be located inside inputs directory.
-	-Filename must have a file extension.
-	-Program will remove file extension and put output into outputs directory.
+-Ensure Java is installed on the PC.
+-Ensure that the input file that you wish to translate is located inside the inputs folder of the assembler.
+-Navigate to the src while in command prompt.
+-Start the assembler by typing “Java Main”
+-It will then prompt for input file name.
+-Next, it will prompt for output type (either bytes or hex).
+-It will then translate the input file into the desired type in the outputs directory. If it was bytes there will be no file extension, if it was hex it will be the same file extension as the input.

@@ -1,7 +1,5 @@
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -91,24 +89,25 @@ public class Main {
         // We only want 1 argument, the filename.txt to be opened for the input.
         // filename.txt must be located inside the input directory.
 
-        // If there is more than 1 input, we want to end early.
-        if (args.length > 1) {
-            System.out.println("Only supports 1 input argument.");
+        args = new String[2];
+
+        Scanner reader = new Scanner(System.in);  // Reading from System.in
+
+        System.out.print("Enter file name: ");
+        args[0] = reader.nextLine();
+
+
+        System.out.print("Enter output type[hex, bytes]: ");
+        args[1] = reader.nextLine();
+
+        if (!args[1].equals("bytes") && !args[1].equals("hex")) {
+            System.out.println("Unknown output type!");
             return;
         }
 
-        // If there is less than 1 input, we want to end early.
-        else if (args.length < 1) {
-            System.out.println("Requires input argument: filename.txt");
-            return;
-        }
-
-        // Print out the file name to verify
+        // Save off filename
         String filename = args[0];
 
-
-        //delete test file later
-//        String filename = "example_loop.txt";
         System.out.println("Assembling... "+filename);
 
         // Set up variables
@@ -197,30 +196,53 @@ public class Main {
                 inst.writeAddress(labelMap.get(label));
             }
 
-            // Sets up output path file, and removes the file extension.
-            Path outputPath = Paths.get("../outputs/" + filename.split("\\.")[0]);
-            String outFilepath = outputPath.toAbsolutePath().toString();
+            if (args[1].equals("bytes")) {
+                // Sets up output path file, and removes the file extension.
+                Path outputPath = Paths.get("../outputs/" + filename.split("\\.")[0]);
+                String outFilepath = outputPath.toAbsolutePath().toString();
 
-            // Creates the file.
-            File outputFile = new File(outFilepath);
+                // Creates the file.
+                File outputFile = new File(outFilepath);
 
-            try (FileOutputStream fos = new FileOutputStream(outputFile))
-            {
-                for (InstructionLine inst : allInstruction) {
-                    // Print for reading.
-                    inst.print();
+                try (FileOutputStream fos = new FileOutputStream(outputFile))
+                {
+                    for (InstructionLine inst : allInstruction) {
+                        // Print for reading.
+                        inst.print();
 
-                    TwoByteBuilder builder = inst.getBuilder();
-                    // Writes the bytes to the file.
-                    fos.write(builder.getByteOne());
-                    fos.write(builder.getByteTwo());
+                        TwoByteBuilder builder = inst.getBuilder();
+                        // Writes the bytes to the file.
+                        fos.write(builder.getByteOne());
+                        fos.write(builder.getByteTwo());
+                    }
+
+
+                    System.out.println("Successfully written data to " + outputPath.toString());
+                } catch (IOException e) {
+                    // Error :(
+                    e.printStackTrace();
                 }
-                System.out.println("Successfully written data to the file");
-            } catch (IOException e) {
-                // Error :(
-                e.printStackTrace();
-            }
+            } else {
+                Path outputPath = Paths.get("../outputs/" + filename);
+                String outFilepath = outputPath.toAbsolutePath().toString();
 
+                // Creates the file.
+//                File outputFile = new File(outFilepath);
+
+                try (PrintStream out = new PrintStream(new FileOutputStream(outFilepath))) {
+                    for (InstructionLine inst : allInstruction) {
+                        // Print for reading.
+                        inst.print();
+
+                        TwoByteBuilder builder = inst.getBuilder();
+                        // Writes the bytes to the file.
+                        out.println(builder.getHex());
+                    }
+                    System.out.println("Successfully written data to " + outputPath.toString());
+                } catch (FileNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
 
             sc.close();
         } catch(Exception e){

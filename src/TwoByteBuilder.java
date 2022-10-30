@@ -56,6 +56,19 @@ public class TwoByteBuilder {
     }
 
     /**
+     * Returns the hex value of the instruction as a string.
+     * @return String
+     */
+    public String getHex() {
+        StringBuilder strBld = new StringBuilder();
+
+        strBld.append(String.format("%02X", this.byteOne));
+        strBld.append(String.format("%02X", this.byteTwo));
+
+        return strBld.toString();
+    }
+
+    /**
      * Returns String format of the Builder.
      * @return
      */

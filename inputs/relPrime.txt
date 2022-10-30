@@ -1,6 +1,7 @@
 // to start, int n is gonna be a0 register
 
-relPrime: lr		sp			//copies sp into main
+relPrime: in a0
+	lr		sp			//copies sp into main
 	addi	-6			//moves sp down by 6
 	sr		sp			//copies main(sp) into sp
 	sr 		sa			//copies main(sp) to sa for usage later
@@ -123,7 +124,7 @@ endOfGcd: lr		sp			//copies sp into main
 	sr		sp			//moves stack value back into its register
 
 	jra		0			//jumps back to the ra
-
+	out a0
 
 
 
