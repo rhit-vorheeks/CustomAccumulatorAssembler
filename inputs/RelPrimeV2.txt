@@ -1,0 +1,133 @@
+// first load n into a0 with in
+in a0
+lr a0
+sr a2
+
+//for first function, m is gonna be at 0 spot on sp
+//n is gonna be at 2 spot on sp
+					
+//move sp down by 4					
+BeginRelPrime: lr sp
+addi -4
+sr sp
+sr sa
+
+//put m( = 2) onto the stack
+andi 0
+addi 2
+sw 0
+
+//put n on the stack
+lr a0
+sw 2
+
+
+// start loop, and take n then put into a0
+StartRelLoop: lw 0
+sr a0
+
+// take m and put into a1
+lw 2
+sr a1
+
+// jump and link into gcd, a0 is result
+jal StartGCD
+lr a0
+
+// subtract for comparison, then if equal to 1 then its over and jump to end
+addi -1
+beq EndRelFunction
+
+// load m and add 1 then store again
+InsideRelLoop: lw 0
+addi 1
+sw 0
+jump StartRelLoop
+
+
+// put a(a0) and b(a1) on stack
+StartGCD: lr sp
+addi -4
+sr sp
+sr sa
+
+// put a on the stack
+lr a0
+sw 0
+
+// put b on the stack
+lr a1
+sw 2
+
+// check if a == 0
+lw 0
+beq EndEarly
+
+// continues since not early, ends if b = 0
+GCDloop: lw 2
+beq EndAfterLoop
+sub 0			// subtracts a from b
+blt GCDbLessA
+lw 2
+sub 0
+sw 2
+jump GCDloop
+
+//if b less than A
+GCDbLessA: lw 0
+sub 2
+sw 0
+jump GCDloop
+
+//ends after while look
+EndAfterLoop: lw 0
+sr a0
+lr sp
+addi 4
+sr sp
+sr sa
+jra 0
+
+// restores stack and ends early with b returning
+EndEarly: lw 2
+sr a0
+lr sp
+addi 4
+sr sp
+sr sa
+jra 0
+
+EndRelFunction: lr sp
+addi 4
+sr sp
+sr sa
+lw 0
+out mn
+
+//takes new input into a3, and then stores a3 in memory to compare to a2(which should be old input)
+StartWaitLoopAtEnd: in a3
+lr sp
+addi -2
+sr sp
+sr sa
+lr a3
+sw 0
+lr a2
+beq LoopBackAtEnd
+
+StartOverAtEnd: lr a3
+sr a0
+sr a2
+lr sp
+addi 2
+sr sp
+sr sa
+jump BeginRelPrime
+
+
+LoopBackAtEnd: lr sp
+addi 2
+sr sp
+sr sa
+jump StartWaitLoopAtEnd
+

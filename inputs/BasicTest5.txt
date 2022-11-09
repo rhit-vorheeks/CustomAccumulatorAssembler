@@ -1,0 +1,7 @@
+in mn
+lr sp
+sr sa
+sw 0
+li 500
+add 0
+out mn

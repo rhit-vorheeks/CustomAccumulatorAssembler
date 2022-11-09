@@ -1,0 +1,10 @@
+in t0
+lr sp
+addi -2
+sr sp
+sr sa
+li 20
+sw 0
+lr t0
+mult 0
+out mn
